@@ -52,7 +52,7 @@ const spec = {
   DISALLOW_REGISTRATION: bool({ default: true }),
   SERVER_IP_ADDRESS: str({ default: "" }),
   SERVER_CNAME_ADDRESS: str({ default: "" }),
-  CUSTOM_DOMAIN_USE_HTTPS: bool({ default: false }),
+  CUSTOM_DOMAIN_USE_HTTPS: bool({ default: "https://my-link-shortener.onrender.com" }),
   JWT_SECRET: str(),
   MAIL_ENABLED: bool({ default: false }),
   MAIL_HOST: str({ default: "" }),
