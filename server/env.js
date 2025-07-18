@@ -28,8 +28,8 @@ if (process.argv.includes("--production")) {
 
 const spec = {
   PORT: num({ default: 3000 }),
-  SITE_NAME: str({ example: "my link shortener", default: "Kutt" }),
-  DEFAULT_DOMAIN: str({ example: "my-link-shortener.onrender.com", default: "localhost:3000" }),
+  SITE_NAME: str({ example: "my link shortener", default: "my-link-shortener" }),
+  DEFAULT_DOMAIN: str({ example: "my-link-shortener.onrender.com", default: "my-link-shortener.onrender.com" }),
   LINK_LENGTH: num({ default: 6 }),
   LINK_CUSTOM_ALPHABET: str({ default: "abcdefghkmnpqrstuvwxyzABCDEFGHKLMNPQRSTUVWXYZ23456789" }),
   TRUST_PROXY: bool({ default: true }),
