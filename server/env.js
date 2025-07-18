@@ -1,82 +1,75 @@
-require("dotenv").config();
-const { cleanEnv, num, str, bool } = require("envalid");
-const { readFileSync } = require("node:fs");
+//
+// server/env.js
+// --- CORRECTED FOR RENDER DEPLOYMENT ---
+//
 
-const supportedDBClients = [
-  "pg",
-  "pg-native",
-  "sqlite3",
-  "better-sqlite3",
-  "mysql",
-  "mysql2"
-];
+const { str, num, cleanEnv, url } = require('envalid');
+const { version } = require('../package.json');
 
-// make sure custom alphabet is not empty
-if (process.env.LINK_CUSTOM_ALPHABET === "") {
-  delete process.env.LINK_CUSTOM_ALPHABET;
-}
+const env = cleanEnv(process.env, {
+  // We will now directly use process.env to read from Render
+  // and only provide defaults for local development.
 
-// make sure jwt secret is not empty
-if (process.env.JWT_SECRET === "") {
-  delete process.env.JWT_SECRET;
-}
+  // --- Core Application Settings ---
+  NODE_ENV: str({
+    choices: ['development', 'test', 'production'],
+    default: 'production', // Default to production for Render
+  }),
+  PORT: num({
+    default: 3000,
+    desc: 'The port to run the server on',
+  }),
+  HOST: str({
+    default: '0.0.0.0', // Important for hosting services like Render
+    desc: 'The host to run the server on',
+  }),
+  
+  // --- Database Connection ---
+  // This is the most important change. It will now read directly from Render's DATABASE_URL.
+  DATABASE_URL: url({
+    desc: 'The connection string for the PostgreSQL database',
+  }),
 
-// if is started with the --production argument, then set NODE_ENV to production
-if (process.argv.includes("--production")) {
-  process.env.NODE_ENV = "production";
-}
+  // --- Security Keys ---
+  // These MUST be set in Render's environment variables. We remove defaults to ensure security.
+  SECRET_KEY_BASE: str({
+    desc: 'A long, random, secret key used for security functions (at least 32 characters)',
+  }),
 
-const spec = {
-  PORT: num({ default: 3000 }),
-  SITE_NAME: str({ example: "my link shortener", default: "my-link-shortener" }),
-  DEFAULT_DOMAIN: str({ example: "my-link-shortener.onrender.com", default: "my-link-shortener.onrender.com" }),
-  LINK_LENGTH: num({ default: 6 }),
-  LINK_CUSTOM_ALPHABET: str({ default: "abcdefghkmnpqrstuvwxyzABCDEFGHKLMNPQRSTUVWXYZ23456789" }),
-  TRUST_PROXY: bool({ default: true }),
-  DB_CLIENT: str({ choices: supportedDBClients, default: "pg" }),
-  DB_FILENAME: str({ default: "db/data" }),
-  DB_HOST: str({ default: "dpg-d1slbuali9vc73bkreug-a" }),
-  DB_PORT: num({ default: 5432 }),
-  DB_NAME: str({ default: "kutt_xbql" }),
-  DB_USER: str({ default: "kutt_xbql_user" }),
-  DB_PASSWORD: str({ default: "" }),
-  DB_SSL: bool({ default: false }),
-  DB_POOL_MIN: num({ default: 0 }),
-  DB_POOL_MAX: num({ default: 10 }),
-  REDIS_ENABLED: bool({ default: false }),
-  REDIS_HOST: str({ default: "127.0.0.1" }),
-  REDIS_PORT: num({ default: 6379 }),
-  REDIS_PASSWORD: str({ default: "" }),
-  REDIS_DB: num({ default: 0 }),
-  DISALLOW_ANONYMOUS_LINKS: bool({ default: true }),
-  DISALLOW_REGISTRATION: bool({ default: true }),
-  SERVER_IP_ADDRESS: str({ default: "" }),
-  SERVER_CNAME_ADDRESS: str({ default: "" }),
-  CUSTOM_DOMAIN_USE_HTTPS: bool({ default: "https://my-link-shortener.onrender.com" }),
-  JWT_SECRET: str(),
-  MAIL_ENABLED: bool({ default: false }),
-  MAIL_HOST: str({ default: "" }),
-  MAIL_PORT: num({ default: 587 }),
-  MAIL_SECURE: bool({ default: false }),
-  MAIL_USER: str({ default: "" }),
-  MAIL_FROM: str({ default: "", example: "Kutt <support@kutt.it>" }),
-  MAIL_PASSWORD: str({ default: "" }),
-  ENABLE_RATE_LIMIT: bool({ default: false }),
-  REPORT_EMAIL: str({ default: "" }),
-  CONTACT_EMAIL: str({ default: "" }),
-  NODE_APP_INSTANCE: num({ default: 0 }),
-};
+  // --- Kutt.it Specific Settings ---
+  // This must be your public Render URL.
+  NEXT_PUBLIC_SITE_URL: url({
+    desc: 'The public URL of your Kutt.it instance (e.g., https://my-kutt.onrender.com)',
+  }),
+  RECAPTCHA_SITE_KEY: str({ default: '' }), // Optional, leave blank if not using
+  RECAPTCHA_SECRET_KEY: str({ default: '' }), // Optional, leave blank if not using
+  GOOGLE_SAFE_BROWSING_KEY: str({ default: '' }), // Optional, leave blank if not using
 
-for (const key in spec) {
-  const file_key = key + "_FILE";
-  if (!(file_key in process.env)) continue;
-  try {
-    process.env[key] = readFileSync(process.env[file_key], "utf8").trim();
-  } catch {
-    // on error, env_FILE just doesn't get applied.
-  }
-}
+  // --- Admin User Setup ---
+  // These will be used to create the first admin user if one doesn't exist.
+  ADMIN_EMAIL: str({
+    desc: 'The email address for the default admin user',
+  }),
+  ADMIN_PASSWORD: str({
+    desc: 'The password for the default admin user',
+  }),
 
-const env = cleanEnv(process.env, spec);
+  // --- Optional Settings (These can usually be left as default) ---
+  NON_USER_COOLDOWN: num({ default: 1000 * 60 }), // Cooldown for non-users in ms
+  USER_COOLDOWN: num({ default: 0 }), // Cooldown for logged-in users in ms
+  DEFAULT_MAX_STATS_PER_LINK: num({ default: 20000 }),
+  LINK_LENGTH: num({ default: 7 }),
+
+  // --- SMTP Mailer Settings (Optional) ---
+  // For features like "Forgot Password". Leave these blank if not setting up email.
+  MAILER_HOST: str({ default: '' }),
+  MAILER_PORT: num({ default: 587 }),
+  MAILER_USER: str({ default: '' }),
+  MAILER_PASS: str({ default: '' }),
+  MAILER_SENDER: str({ default: 'no-reply@kutt.it' }),
+
+  // --- Version (Read from package.json) ---
+  VERSION: str({ default: version }),
+});
 
 module.exports = env;
