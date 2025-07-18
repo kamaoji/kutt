@@ -44,7 +44,7 @@ const spec = {
   DB_POOL_MIN: num({ default: 0 }),
   DB_POOL_MAX: num({ default: 10 }),
   REDIS_ENABLED: bool({ default: false }),
-  REDIS_HOST: str({ default: "100.20.92.101" }),
+  REDIS_HOST: str({ default: "" }),
   REDIS_PORT: num({ default: 6379 }),
   REDIS_PASSWORD: str({ default: "" }),
   REDIS_DB: num({ default: 0 }),
