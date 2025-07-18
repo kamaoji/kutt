@@ -29,7 +29,7 @@ if (process.argv.includes("--production")) {
 const spec = {
   PORT: num({ default: 3000 }),
   SITE_NAME: str({ example: "Kutt", default: "Kutt" }),
-  DEFAULT_DOMAIN: str({ example: "kutt.it", default: "https://my-link-shortener.onrender.com" }),
+  DEFAULT_DOMAIN: str({ example: "kutt.it", default: "" }),
   LINK_LENGTH: num({ default: 6 }),
   LINK_CUSTOM_ALPHABET: str({ default: "abcdefghkmnpqrstuvwxyzABCDEFGHKLMNPQRSTUVWXYZ23456789" }),
   TRUST_PROXY: bool({ default: true }),
