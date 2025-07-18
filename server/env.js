@@ -38,7 +38,7 @@ const spec = {
   DB_HOST: str({ default: "localhost" }),
   DB_PORT: num({ default: 5432 }),
   DB_NAME: str({ default: "kutt" }),
-  DB_USER: str({ default: "postgres" }),
+  DB_USER: str({ default: "" }),
   DB_PASSWORD: str({ default: "" }),
   DB_SSL: bool({ default: false }),
   DB_POOL_MIN: num({ default: 0 }),
