@@ -23,12 +23,13 @@ const env = cleanEnv(process.env, {
     default: '0.0.0.0', // Important for hosting services like Render
     desc: 'The host to run the server on',
   }),
-  
   // --- Database Connection ---
-  // This is the most important change. It will now read directly from Render's DATABASE_URL.
-  DATABASE_URL: url({
-    desc: 'The connection string for the PostgreSQL database',
-  }),
+// This is the most important change. It will now read directly from Render's DATABASE_URL.
+DATABASE_URL: url({
+  desc: 'The connection string for the PostgreSQL database',
+}),
+// NEW LINE: Add a validator for the DB_CLIENT variable provided by Render
+DB_CLIENT: str({ default: 'postgres' }),
 
   // --- Security Keys ---
   // These MUST be set in Render's environment variables. We remove defaults to ensure security.
